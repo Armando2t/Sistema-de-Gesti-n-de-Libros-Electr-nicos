@@ -1,46 +1,29 @@
-// Autor: Armando Topón
-// Fecha: 24/11/2024
-// Descripción: Simulación de repositorio en memoria para gestionar usuarios.
-
 package repositorios
 
 import (
 	"SistemaGestionLibrosElectronicos/modelos"
-	"errors"
-	"fmt"
 )
 
-// Slice para almacenar los usuarios simulando la base de datos
-var usuarios = []modelos.Usuario{}
-var idCounter = 1
+// Lista temporal de usuarios
+var usuarios []modelos.Usuario
 
-// RegistrarUsuario simula agregar un usuario al "almacenamiento"
-func RegistrarUsuario(usuario modelos.Usuario) error {
-	usuario.ID = idCounter
-	idCounter++
+// Función para registrar un usuario nuevo en la lista
+func RegistrarUsuario(usuario modelos.Usuario) {
+	usuario.ID = len(usuarios) + 1  // Asigna un ID único basado en el tamaño de la lista
 	usuarios = append(usuarios, usuario)
-	fmt.Println("Usuario registrado correctamente")
-	return nil
 }
 
-// ListarUsuarios simula la recuperación de todos los usuarios
-func ListarUsuarios() ([]modelos.Usuario, error) {
-	if len(usuarios) == 0 {
-		return nil, errors.New("no hay usuarios registrados")
-	}
-	return usuarios, nil
+// Función para listar todos los usuarios
+func ListarUsuarios() []modelos.Usuario {
+	return usuarios
 }
 
-// ActualizarUsuario simula la actualización de un usuario por ID
-func ActualizarUsuario(id int, nuevosDatos modelos.Usuario) error {
-	for i, usuario := range usuarios {
-		if usuario.ID == id {
-			usuarios[i].Nombre = nuevosDatos.Nombre
-			usuarios[i].Apellido = nuevosDatos.Apellido
-			usuarios[i].Correo = nuevosDatos.Correo
-			fmt.Println("Usuario actualizado correctamente")
-			return nil
+// Función para actualizar la información de un usuario
+func ActualizarUsuario(id int, usuario modelos.Usuario) {
+	for i, u := range usuarios {
+		if u.ID == id {
+			usuarios[i] = usuario
+			break
 		}
 	}
-	return errors.New("usuario no encontrado")
 }

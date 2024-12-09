@@ -1,53 +1,51 @@
 // Autor: Armando Topón
-// Fecha: 24/11/2024
-// Descripción: Probamos las funciones sin base de datos.
-
+// Fecha: 08/12/2024
+// Descripción: Menú principal para la gestión de usuarios en el sistema.
 package main
 
 import (
-	"SistemaGestionLibrosElectronicos/modelos"
-	"SistemaGestionLibrosElectronicos/repositorios"
 	"fmt"
+	"SistemaGestionLibrosElectronicos/controles"
 )
 
+// Función principal que muestra el menú
 func main() {
-	//Registrar un usuario
-	usuario := modelos.Usuario{
-		Nombre:    "Armando",
-		Apellido:  "Topon",
-		Cedula:    "1720671591",
-		Direccion: "Sangolqui",
-		Correo:    "armando@local.com",
-		Rol:       "Lector",
+	for {
+		menu()
 	}
-	repositorios.RegistrarUsuario(usuario)
+}
 
-	//Listar todos los usuarios
-	usuarios, err := repositorios.ListarUsuarios()
-	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Lista de usuarios:")
-		for _, u := range usuarios {
-			fmt.Printf("ID: %d, Nombre: %s %s, Correo: %s\n", u.ID, u.Nombre, u.Apellido, u.Correo)
-		}
-	}
+// Función para mostrar el menú
+func menu() {
+	var opcion int
+	fmt.Println("\nSistema de Gestión de Libros Electrónicos")
+	fmt.Println("1. Registrar Usuario")
+	fmt.Println("2. Listar Usuarios")
+	fmt.Println("3. Registrar Libro")
+	fmt.Println("4. Listar Libros")
+	fmt.Println("5. Registrar Préstamo")
+	fmt.Println("6. Aplicar Multa")
+	fmt.Println("7. Salir")
+	fmt.Print("Seleccione una opción: ")
+	fmt.Scan(&opcion)
 
-	//Actualizar un usuario
-	nuevosDatos := modelos.Usuario{
-		Nombre:   "Pedro",
-		Apellido: "Jacome",
-		Correo:   "pedro@local.com",
-	}
-	err = repositorios.ActualizarUsuario(1, nuevosDatos)
-	if err != nil {
-		fmt.Println("Error al actualizar:", err)
-	}
-
-	//Listar usuarios nuevamente para ver los cambios
-	usuarios, _ = repositorios.ListarUsuarios()
-	fmt.Println("Lista de usuarios después de la actualización:")
-	for _, u := range usuarios {
-		fmt.Printf("ID: %d, Nombre: %s %s, Correo: %s\n", u.ID, u.Nombre, u.Apellido, u.Correo)
+	switch opcion {
+	case 1:
+		controles.RegistrarUsuario()
+	case 2:
+		controles.ListarUsuarios()
+	case 3:
+		controles.RegistrarLibro()
+	case 4:
+		controles.ListarLibros()
+	case 5:
+		controles.RegistrarPrestamo()
+	case 6:
+		controles.AplicarMulta()
+	case 7:
+		fmt.Println("Saliendo...")
+		return
+	default:
+		fmt.Println("Opción no válida.")
 	}
 }
