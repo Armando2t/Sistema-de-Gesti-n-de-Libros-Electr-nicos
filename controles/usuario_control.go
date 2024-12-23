@@ -1,39 +1,78 @@
+// Autor: Armando Topón
+// Fecha: 22/12/2024
+// Descripción: Controlador para manejar las operaciones relacionadas con los usuarios.
+
 package controles
 
 import (
-	"fmt"
+	"encoding/json"
+	"net/http"
+	"SistemaGestionLibrosElectronicos/config"
 	"SistemaGestionLibrosElectronicos/modelos"
 	"SistemaGestionLibrosElectronicos/repositorios"
 )
 
-// Función para registrar un usuario
-func RegistrarUsuario() {
-	var usuario modelos.Usuario
-	fmt.Println("Registrar Usuario:")
-	fmt.Print("Nombre: ")
-	fmt.Scan(&usuario.Nombre)
-	fmt.Print("Apellido: ")
-	fmt.Scan(&usuario.Apellido)
-	fmt.Print("Cédula: ")
-	fmt.Scan(&usuario.Cedula)
-	fmt.Print("Dirección: ")
-	fmt.Scan(&usuario.Direccion)
-	fmt.Print("Correo: ")
-	fmt.Scan(&usuario.Correo)
-	fmt.Print("Rol (Admin/Usuario): ")
-	fmt.Scan(&usuario.Rol)
+// ManejarUsuarios gestiona las solicitudes relacionadas con los usuarios.
 
-	// Registra el usuario
-	repositorios.RegistrarUsuario(usuario)
-	fmt.Println("Usuario registrado exitosamente.")
-}
+func ManejarUsuarios(w http.ResponseWriter, r *http.Request) {
+	db, err := config.ConectarBD()
+	if err != nil {
+		http.Error(w, "Error al conectar con la base de datos", http.StatusInternalServerError)
+		return
+	}
+	defer config.CerrarBD(db)
 
-// Función para listar todos los usuarios
-func ListarUsuarios() {
-	fmt.Println("Listado de Usuarios:")
-	usuarios := repositorios.ListarUsuarios()
-	for _, usuario := range usuarios {
-		fmt.Printf("ID: %d, Nombre: %s %s, Cédula: %s, Correo: %s, Rol: %s\n",
-			usuario.ID, usuario.Nombre, usuario.Apellido, usuario.Cedula, usuario.Correo, usuario.Rol)
+	switch r.Method {
+	case "POST":
+		var usuario modelos.Usuario
+		if err := json.NewDecoder(r.Body).Decode(&usuario); err != nil {
+			http.Error(w, "Datos inválidos", http.StatusBadRequest)
+			return
+		}
+
+		// Validar los datos del usuario.
+		if err := ValidarEstructura(usuario); err != nil {
+			http.Error(w, "Error de validación: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := repositorios.RegistrarUsuario(db, usuario); err != nil {
+			http.Error(w, "Error al registrar usuario", http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode("Usuario registrado correctamente")
+
+	case "PUT":
+		var usuario modelos.Usuario
+		if err := json.NewDecoder(r.Body).Decode(&usuario); err != nil {
+			http.Error(w, "Datos inválidos", http.StatusBadRequest)
+			return
+		}
+
+		// Validar los datos antes de actualizar.
+		if err := ValidarEstructura(usuario); err != nil {
+			http.Error(w, "Error de validación: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := repositorios.ActualizarUsuario(db, usuario); err != nil {
+			http.Error(w, "Error al actualizar usuario", http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode("Usuario actualizado correctamente")
+
+	case "GET":
+		usuarios, err := repositorios.ListarUsuarios(db)
+		if err != nil {
+			http.Error(w, "Error al listar usuarios", http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(usuarios)
+
+	default:
+		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 	}
 }
+

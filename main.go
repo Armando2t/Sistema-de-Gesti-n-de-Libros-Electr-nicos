@@ -1,51 +1,39 @@
 // Autor: Armando Topón
-// Fecha: 08/12/2024
-// Descripción: Menú principal para la gestión de usuarios en el sistema.
+// Fecha: 22/12/2024
+// Descripción: Punto de entrada principal del sistema.
+
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
+	"SistemaGestionLibrosElectronicos/config"
 	"SistemaGestionLibrosElectronicos/controles"
 )
 
-// Función principal que muestra el menú
 func main() {
-	for {
-		menu()
+	// Configuración inicial de la base de datos.
+	db, err := config.ConectarBD()
+	if err != nil {
+		log.Fatalf("Error al conectar a la base de datos: %v", err)
 	}
+	defer db.Close()
+
+	// Configuración de rutas.
+	http.HandleFunc("/usuarios", controles.ManejarUsuarios)
+	http.HandleFunc("/libros", controles.ManejarLibros)
+	http.HandleFunc("/prestamos", controles.ManejarPrestamos)
+	http.HandleFunc("/multas", controles.ManejarMultas)
+	
+	// Rutas para funcionalidades con templates.
+	http.HandleFunc("/multas/historial", controles.VerHistorialMultas)
+	http.HandleFunc("/prestamos/activos", controles.VerPrestamosActivos)
+
+	// Iniciar el servidor.
+	log.Println("Servidor iniciado en http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// Función para mostrar el menú
-func menu() {
-	var opcion int
-	fmt.Println("\nSistema de Gestión de Libros Electrónicos")
-	fmt.Println("1. Registrar Usuario")
-	fmt.Println("2. Listar Usuarios")
-	fmt.Println("3. Registrar Libro")
-	fmt.Println("4. Listar Libros")
-	fmt.Println("5. Registrar Préstamo")
-	fmt.Println("6. Aplicar Multa")
-	fmt.Println("7. Salir")
-	fmt.Print("Seleccione una opción: ")
-	fmt.Scan(&opcion)
 
-	switch opcion {
-	case 1:
-		controles.RegistrarUsuario()
-	case 2:
-		controles.ListarUsuarios()
-	case 3:
-		controles.RegistrarLibro()
-	case 4:
-		controles.ListarLibros()
-	case 5:
-		controles.RegistrarPrestamo()
-	case 6:
-		controles.AplicarMulta()
-	case 7:
-		fmt.Println("Saliendo...")
-		return
-	default:
-		fmt.Println("Opción no válida.")
-	}
-}
+
+

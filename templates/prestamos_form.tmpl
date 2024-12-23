@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Préstamos Activos</title>
+</head>
+<body>
+    <h1>Consultar Préstamos Activos</h1>
+    <form action="/prestamos/activos" method="GET">
+        <label for="idUsuario">ID Usuario:</label>
+        <input type="number" id="idUsuario" name="idUsuario" required>
+        <button type="submit">Consultar</button>
+    </form>
+
+    {{if .Usuario}}
+    <h2>Préstamos Activos para el Usuario {{.Usuario}}</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID Préstamo</th>
+                <th>ID Libro</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Prestamos}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.IDLibro}}</td>
+                <td>{{.FechaInicio}}</td>
+                <td>{{.FechaFin}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{end}}
+</body>
+</html>
